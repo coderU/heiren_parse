@@ -1,7 +1,7 @@
-
+User = require("cloud/users.js")
 // These two lines are required to initialize Express in Cloud Code.
- express = require('express');
- app = express();
+express = require('express');
+app = express();
 
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
@@ -13,6 +13,12 @@ app.use(express.bodyParser());    // Middleware for reading request body
 app.get('/hello', function(req, res) {
   res.render('hello', { message: 'Congrats, you just set up your app!' });
 });
+
+app.post('/hello', function(req, res) {
+    User.register(req.body.message, res);
+});
+
+
 
 // // Example reading from the request query string of an HTTP get request.
 // app.get('/test', function(req, res) {
