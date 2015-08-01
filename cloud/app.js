@@ -1,4 +1,5 @@
 User = require("cloud/users.js")
+Marker = require("cloud/markers.js")
 parseExpressHttpsRedirect = require('parse-express-https-redirect');
 parseExpressCookieSession = require('parse-express-cookie-session');
 // These two lines are required to initialize Express in Cloud Code.
@@ -49,7 +50,27 @@ app.get('/apis/users/me', function(req, res) {
   }
 });
 
+//Apis for markers
+app.get('/apis/markers', function(req, res){
+  Marker.fetchAll(function(result, markers){
+    if(result != "ok"){
 
+    }else{
+      res.send(markers);
+    }
+  });
+});
+
+
+app.post('/apis/markers', function(req, res){
+  Marker.create(function(result){
+    if(result != "ok"){
+      res.status(500).send(result);
+    }else{
+      res.send(result);
+    }
+  });
+});
 // // Example reading from the request query string of an HTTP get request.
 // app.get('/test', function(req, res) {
 //   // GET http://example.parseapp.com/test?message=hello
