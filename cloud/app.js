@@ -75,7 +75,7 @@ app.post('/apis/markers', function(req, res){
 
 //apis for campaign
 app.post('/apis/campaign', function(req, res) {
-    Campaign.create(req.body.name, req.body.goal, req.body.type, req.body.headline, req.body.statement, function(result){
+    Campaign.create(req.body.name, req.body.goal, req.body.type, req.body.headline, req.body.statement, user, function(result){
         if(result != "ok"){
             res.status(500).send(result);
         }else{
