@@ -1,6 +1,6 @@
 User = require("cloud/users.js")
 Marker = require("cloud/markers.js")
-Marker = require("cloud/campaign.js")
+Campaign = require("cloud/campaign.js")
 parseExpressHttpsRedirect = require('parse-express-https-redirect');
 parseExpressCookieSession = require('parse-express-cookie-session');
 // These two lines are required to initialize Express in Cloud Code.
@@ -11,7 +11,7 @@ app = express();
 app.set('views', 'cloud/views');  // Specify the folder to find templates
 app.set('view engine', 'ejs');    // Set the template engine
 app.use(express.bodyParser());    // Middleware for reading request body
-//app.use(parseExpressHttpsRedirect());  // Require user to be on HTTPS.
+app.use(parseExpressHttpsRedirect());  // Require user to be on HTTPS.
 app.use(express.cookieParser('YOUR_SIGNING_SECRET'));
 app.use(parseExpressCookieSession({ cookie: { maxAge: 3600000 } }));
 // This is an example of hooking up a request handler with a specific request
@@ -31,13 +31,19 @@ app.post('/apis/users', function(req, res) {
       }
     });
 });
+app.get('/login', function(req, res) {
+  // Renders the login form asking for username and password.
+  res.render('login.ejs');
+});
 
 app.get('/apis/users', function(req, res) {
     User.login(req.query.email, req.query.password, function(result){
       if(result != "ok"){
-        res.status(500).send(result);
+        res.redirect('/login');
+        // res.status(500).send(result);
       }else {
-        res.send(result);
+        res.redirect('/apis/users/me');
+        // res.send(token);
       }
     });
 });
@@ -47,15 +53,35 @@ app.get('/apis/users/me', function(req, res) {
   if (currentUser) {
       res.send(currentUser);
   } else {
-      res.send("Login page");
+      res.redirect('/login');
   }
 });
 
 //Apis for markers
+app.get('/apis/markers/locations', function(req, res){
+  Marker.fetchLocations(function(result, markers){
+    if(result != "ok"){
+      res.status(500).send(result);
+    }else{
+      res.send(markers);
+    }
+  });
+});
+
+app.get('/apis/markers/detail', function(req, res) {
+    Marker.fetchDetail(req.query.objectId, function(result, marker){
+      if(result != "ok"){
+        res.status(500).send(result);
+      }else {
+        res.send(marker);
+      }
+    });
+});
+
 app.get('/apis/markers', function(req, res){
   Marker.fetchAll(function(result, markers){
     if(result != "ok"){
-
+      res.status(500).send(result);
     }else{
       res.send(markers);
     }
@@ -64,7 +90,7 @@ app.get('/apis/markers', function(req, res){
 
 
 app.post('/apis/markers', function(req, res){
-  Marker.create(function(result){
+  Marker.create(req.body.title, req.body.content, Number(req.body.lat), Number(req.body.lng), req.body.imgUrl, req.body.completedTime, function(result){
     if(result != "ok"){
       res.status(500).send(result);
     }else{
@@ -75,13 +101,18 @@ app.post('/apis/markers', function(req, res){
 
 //apis for campaign
 app.post('/apis/campaign', function(req, res) {
-    Campaign.create(req.body.name, req.body.goal, req.body.type, req.body.headline, req.body.statement, user, function(result){
-        if(result != "ok"){
-            res.status(500).send(result);
-        }else{
-            res.send(result);
-        }
-    });
+    var currentUser = Parse.User.current();
+    if(currentUser){
+      Campaign.create(req.body.name, Number(req.body.goal) , req.body.type, req.body.headline, req.body.statement, currentUser.id, function(result){
+          if(result != "ok"){
+              res.status(500).send(result);
+          }else{
+              res.send(result);
+          }
+      });
+    }else{
+      res.redirect('/login');
+    }
 });
 
 

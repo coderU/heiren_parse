@@ -1,5 +1,38 @@
 var Marker_Object = Parse.Object.extend("Marker");
 var Marker={
+    fetchLocations: function(callback){
+      var query = new Parse.Query(Marker_Object);
+      query.select('location');
+      query.find({
+        success: function(results) {
+          alert("Successfully retrieved " + results.length + " markers.");
+          // Do something with the returned Parse.Object values
+          // for (var i = 0; i < results.length; i++) {
+          //   var object = results[i];
+          //   alert(object.id + ' - ' + object.get('title'));
+          // }
+          callback("ok",results);
+        },
+        error: function(error) {
+          callback("Error: " + error.code + " " + error.message);
+          alert("Error: " + error.code + " " + error.message);
+        }
+      });
+    },
+
+    fetchDetail: function(objectId, callback){
+      var query = new Parse.Query(Marker_Object);
+      query.get(objectId, {
+        success: function(marker) {
+          callback("ok", marker)
+        },
+        error: function(object, error) {
+          callback("Error: " + error.code + " " + error.message);
+          alert("Error: " + error.code + " " + error.message);
+        }
+      });
+    },
+
     fetchAll: function(callback){
       alert("Fetching maarkers")
       var query = new Parse.Query(Marker_Object);
@@ -7,10 +40,10 @@ var Marker={
         success: function(results) {
           alert("Successfully retrieved " + results.length + " markers.");
           // Do something with the returned Parse.Object values
-          for (var i = 0; i < results.length; i++) {
-            var object = results[i];
-            alert(object.id + ' - ' + object.get('title'));
-          }
+          // for (var i = 0; i < results.length; i++) {
+          //   var object = results[i];
+          //   alert(object.id + ' - ' + object.get('title'));
+          // }
           callback("ok",results);
         },
         error: function(error) {
@@ -19,12 +52,18 @@ var Marker={
       });
     },
 
-    create: function(callback){
+    create: function(title, content, lat, lng, imgUrl, completedTime, callback){
       var marker = new Marker_Object();
 
-      marker.set("title", "test3");
-      marker.set("lat", 7.188);
-      marker.set("lng", 18.093);
+      marker.set("title", title);
+      var point = new Parse.GeoPoint({latitude: lat, longitude: lng});
+      marker.set("location", point)
+      // marker.set("lat", lat);
+      // marker.set("lng", lng);
+
+      marker.set("imgUrl", imgUrl);
+      marker.set("completedTime", completedTime);
+      marker.set("content", content);
       marker.save(null, {
         success: function(marker) {
           // Execute any logic that should take place after the object is saved.
