@@ -8,6 +8,9 @@ var User={
       // other fields can be set just like with Parse.Object
       user.set("phone", phone);
       user.set("fullname", fullname);
+      user.set("money", 0);
+      user.set("campaignList", []);
+      user.set("donateList", []);
       user.signUp(null, {
         success: function(user) {
           callback("ok");

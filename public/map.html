@@ -76,7 +76,7 @@
             var CompletedTime = "july 2015";
             function loadDetailsFromServer(objectId, callback) {
                 $.ajax({
-                    url: "http://heiren.parseapp.com/apis/markers/detail?objectId="+objectId,
+                    url: "https://heiren.parseapp.com/apis/markers/detail?objectId="+objectId,
                     dataType: 'json',
                     cache: false,
                     success: function(data) {
@@ -164,7 +164,7 @@
     });
 
     React.render(
-            <MapLayout url="http://heiren.parseapp.com/apis/markers/locations" />,
+            <MapLayout url="https://heiren.parseapp.com/apis/markers/locations" />,
             document.getElementById('content')
     );
 </script>
