@@ -9,7 +9,7 @@ var User={
         user.set("phone", phone);
         user.set("fullname", fullname);
         user.set("money", 0);
-        user.set("campaignList", {});
+        user.set("campaignList", []);
         user.set("donateList", {});
         user.signUp(null, {
             success: function(user) {

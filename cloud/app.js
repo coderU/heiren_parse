@@ -42,7 +42,7 @@ app.get('/login', function(req, res) {
 });
 
 app.get('/register', function(req, res) {
-    
+
     var currentUser = Parse.User.current();
     if(currentUser){
         //TODO: jump to user homepage
@@ -84,30 +84,7 @@ app.get('/apis/users/me', function(req, res) {
             fetchedUser.set("campaign_summary", summary);
             res.send(fetchedUser);
           }
-
         });
-
-
-        // for(var key in campaignList){
-        //   Campaign.countMoney(campaignList[key],function(result, summary){
-        //     alert("Result: "+ result);
-        //     if(result == "ok"){
-        //       alert("Summary: "+summary);
-        //       campaign_summary.push(summary);
-        //       sum += summary["total"];
-        //     }
-        //   });
-        // }
-
-        // var p = Parse.Promise.as(Campaign.countMoney(campaignList[0]));
-        // Parse.Promise.when(p).then(function(result) {
-        //   alert("Result: "+ result);
-        //   fetchedUser.set("sum", sum);
-        //   fetchedUser.set("campaign_summary", campaign_summary);
-        //   res.send(fetchedUser);
-        // });
-
-
       });
   } else {
       res.redirect('/login');
@@ -203,7 +180,7 @@ app.post('/apis/campaign', function(req, res) {
           }
       }, function(error){
           res.status(500).send(error);
-          console.log("error");
+          console.log(error);
       });
     }else{
       res.redirect('/login');
