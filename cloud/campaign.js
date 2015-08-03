@@ -82,25 +82,25 @@ var Campaign={
               donateList = {};
             }
 
-            if(!donateList[campaignId]){
-              donateList[campaignId] = {"campaign": campaign.get("name"), "amount": amount}
-            }else{
-              newAmount = donateList[campaignId]["amount"] + amount;
-              donateList[campaignId] = {"campaign": campaign.get("name"), "amount": newAmount}
-            }
-            var money = fetchedUser.get("money");
-            money += amount;
-            currentUser.set("money", money);
-            currentUser.set("donateList", donateList);
-            currentUser.save(null,{
-              success: function(user){
-                callback("ok");
-              },
-              error: function(user, error){
-                callback(error.message);
-                alert(error.message);
+              if(!donateList[campaignId]){
+                  donateList[campaignId] = {"campaign": campaign.get("name"), "amount": amount}
+              }else{
+                  newAmount = donateList[campaignId]["amount"] + amount;
+                  donateList[campaignId] = {"campaign": campaign.get("name"), "amount": newAmount}
               }
-            });
+              var money = fetchedUser.get("money");
+              money += amount;
+              currentUser.set("money", money);
+              currentUser.set("donateList", donateList);
+              currentUser.save(null,{
+                  success: function(user){
+                      callback("ok");
+                  },
+                  error: function(user, error){
+                      callback(error.message);
+                      alert(error.message);
+                  }
+              });
           },
           error: function(campaign, error) {
             // Execute any logic that should take place if the save fails.

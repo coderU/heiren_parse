@@ -38,7 +38,17 @@ app.post('/apis/users', function(req, res) {
 });
 app.get('/login', function(req, res) {
   // Renders the login form asking for username and password.
-  res.render('login.ejs');
+    res.render('login.ejs');
+});
+
+app.get('/register', function(req, res) {
+    
+    var currentUser = Parse.User.current();
+    if(currentUser){
+        //TODO: jump to user homepage
+    }
+    //should be else branch here
+    res.render('register.ejs');
 });
 
 app.get('/apis/users', function(req, res) {
@@ -156,12 +166,18 @@ app.post('/apis/markers', function(req, res){
 });
 
 //apis for campaign
+app.get('/newCampaign', function(req, res) {
+  // Renders the login form asking for username and password.
+    res.render('newCampaign.ejs');
+});
+
 app.post('/apis/campaign', function(req, res) {
     var currentUser = Parse.User.current();
     if(currentUser){
       currentUser.fetch().then(function(fetchedUser){
           var name = fetchedUser.get("fullname");
           //Create Campaign and add in the Campaign table
+          console.log(req.body.name);
           if(req.body.name && Number(req.body.goal) && req.body.type && req.body.headline && req.body.statement){
             Campaign.create(req.body.name, Number(req.body.goal) , req.body.type, req.body.headline, req.body.statement, name, function(result, campaignId){
                 if(result != "ok"){
@@ -186,7 +202,8 @@ app.post('/apis/campaign', function(req, res) {
             res.status(500).send("Lack of parameter!");
           }
       }, function(error){
-          res.status(500).send(err);
+          res.status(500).send(error);
+          console.log("error");
       });
     }else{
       res.redirect('/login');
