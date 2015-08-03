@@ -30,6 +30,17 @@ function syncFor(campaignList, count, result, callback) {
   }
 }
 var Campaign={
+  fetchDetail: function(campaignId, callback){
+    var query = new Parse.Query(Campaign_Object);
+    query.get(campaignId, {
+      success: function(campaign){
+        callback("ok", campaign);
+      },
+      error: function(campaign, error){
+        call("Campaign Detail error: "+ error);
+      }
+    });
+  },
   countMoney: function(campaignList, count, result, callback){
     return syncFor(campaignList, count, result, callback);
   },
@@ -42,6 +53,8 @@ var Campaign={
     campaign.set("type", type);
     campaign.set("statement", statement);
     campaign.set("founder", userId);
+    campaign.set("donator",{});
+    campaign.set("total", 0);
     campaign.save(null, {
       success: function(campaign) {
         // Execute any logic that should take place after the object is saved.
@@ -72,7 +85,10 @@ var Campaign={
         }else{
           donator[name] = donator[name] +amount;
         }
+        var total = campaign.get("total");
+        total += amount;
         campaign.set("donator", donator);
+        campaign.set("total", total);
         campaign.save(null,{
           success: function(campaign) {
             // Execute any logic that should take place after the object is saved.

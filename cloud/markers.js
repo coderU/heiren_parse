@@ -58,9 +58,6 @@ var Marker={
       marker.set("title", title);
       var point = new Parse.GeoPoint({latitude: lat, longitude: lng});
       marker.set("location", point)
-      // marker.set("lat", lat);
-      // marker.set("lng", lng);
-
       marker.set("imgUrl", imgUrl);
       marker.set("completedTime", completedTime);
       marker.set("content", content);

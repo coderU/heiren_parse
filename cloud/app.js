@@ -73,8 +73,6 @@ app.get('/apis/users/me', function(req, res) {
         var campaignList = fetchedUser.get("campaignList");
         var sum = 0;
         var campaign_summary = [];
-
-
         Campaign.countMoney(campaignList, 0, [],function(result, summary){
           if(result == "ok"){
             for(var key in summary){
@@ -90,6 +88,28 @@ app.get('/apis/users/me', function(req, res) {
       res.redirect('/login');
   }
 });
+
+
+
+app.post('/apis/users/donate', function(req, res){
+  if(req.body.amount){
+    var currentUser = Parse.User.current();
+    if(currentUser){
+      User.donate(currentUser, Number(req.body.amount), function(result){
+        if(result == 'ok'){
+          res.send(result);
+        }else{
+          res.status(500).send(result);
+        }
+      })
+    }else{
+      res.redirect('/login');
+    }
+  }else{
+    res.status(500).send("Lacking of parameters");
+  }
+});
+
 
 //Apis for markers
 app.get('/apis/markers/locations', function(req, res){
@@ -116,7 +136,7 @@ app.get('/apis/markers/detail', function(req, res) {
     }
 });
 
-app.get('/apis/markers', function(req, res){
+app.get('/apis/markers/all', function(req, res){
   Marker.fetchAll(function(result, markers){
     if(result != "ok"){
       res.status(500).send(result);
@@ -205,12 +225,23 @@ app.post('/apis/campaign/donate/:campaignId', function(req, res) {
         res.redirect('/login');
     }
   }else{
-
+    res.status(500).send("Lacking of parameters");
   }
-
 });
 
-
+app.get('/apis/campaign/:campaignId', function(req,res){
+  if(req.params.campaignId){
+    Campaign.fetchDetail(req.params.campaignId, function(result, campaign){
+      if(result == 'ok'){
+        res.send(campaign);
+      }else{
+        res.status(500).send(result);
+      }
+    });
+  }else{
+    res.status(500).send("Lacking of parameters");
+  }
+});
 
 
 // // Example reading from the request query string of an HTTP get request.
