@@ -35,19 +35,17 @@ var User={
         });
     },
 
-    donate: function (currentUser, amount, callback) {
-      currentUser.fetch().then(function(fetchedUser){
-        var money = fetchedUser.get("money");
-        money += amount;
-        currentUser.set("money", money);
-        currentUser.save(null,{
-          success: function(user){
-            callback("ok");
-          },
-          error: function(user, error){
-            callback("User donate error: " + error);
-          }
-        });
+    donate: function (fetchedUser, currentUser, amount, callback) {
+      var money = fetchedUser.get("money");
+      money += amount;
+      currentUser.set("money", money);
+      currentUser.save(null,{
+        success: function(user){
+          callback("ok");
+        },
+        error: function(user, error){
+          callback("User donate error: " + error);
+        }
       });
     }
 

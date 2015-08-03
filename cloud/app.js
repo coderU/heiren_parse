@@ -1,6 +1,7 @@
-User = require("cloud/users.js")
-Marker = require("cloud/markers.js")
-Campaign = require("cloud/campaign.js")
+User = require("cloud/users.js");
+Marker = require("cloud/markers.js");
+Campaign = require("cloud/campaign.js");
+Stripe = require("cloud/stripe.js");
 var _ = require('underscore');
 parseExpressHttpsRedirect = require('parse-express-https-redirect');
 parseExpressCookieSession = require('parse-express-cookie-session');
@@ -63,7 +64,6 @@ app.get('/apis/users', function(req, res) {
   }else{
     res.status(500).send("Lack of parameter!");
   }
-
 });
 
 app.get('/apis/users/me', function(req, res) {
@@ -92,16 +92,25 @@ app.get('/apis/users/me', function(req, res) {
 
 
 app.post('/apis/users/donate', function(req, res){
-  if(req.body.amount){
+  if(req.body.amount && req.body.stripeToken){
     var currentUser = Parse.User.current();
     if(currentUser){
-      User.donate(currentUser, Number(req.body.amount), function(result){
-        if(result == 'ok'){
-          res.send(result);
-        }else{
-          res.status(500).send(result);
-        }
-      })
+      currentUser.fetch().then(function(fetchedUser){
+          var name = fetchedUser.get("fullname");
+          Stripe.pre_donate(req.body.stripeToken, "Any", name, Number(req.body.amount), function(result){
+            if(result == "ok"){
+              User.donate(fetchedUser, currentUser, Number(req.body.amount), function(result){
+                if(result == 'ok'){
+                  res.send(result);
+                }else{
+                  res.status(500).send(result);
+                }
+              });
+            }else{
+              res.status(500).send(result);
+            }
+          });
+        });
     }else{
       res.redirect('/login');
     }
@@ -208,18 +217,24 @@ app.post('/apis/campaign', function(req, res) {
 });
 
 app.post('/apis/campaign/donate/:campaignId', function(req, res) {
-  if(req.body.amount && req.params.campaignId){
+  if(req.body.amount && req.params.campaignId && req.body.stripeToken){
     var currentUser = Parse.User.current();
     if (currentUser) {
       currentUser.fetch().then(function(fetchedUser){
           var name = fetchedUser.get("fullname");
-          Campaign.donate(req.params.campaignId, name, Number(req.body.amount), fetchedUser, currentUser, function(result) {
+          Stripe.pre_donate(req.body.stripeToken, req.params.campaignId, name, Number(req.body.amount), function(result){
             if(result == "ok"){
-              res.send(result);
+              Campaign.donate(req.params.campaignId, name, Number(req.body.amount), fetchedUser, currentUser, function(result) {
+                if(result == "ok"){
+                  res.send(result);
+                }else{
+                  res.status(500).send(result);
+                }
+              });
             }else{
               res.status(500).send(result);
             }
-          });
+          });    
         });
     } else {
         res.redirect('/login');
@@ -228,6 +243,15 @@ app.post('/apis/campaign/donate/:campaignId', function(req, res) {
     res.status(500).send("Lacking of parameters");
   }
 });
+
+//Test Only Api!
+app.get('/apis/donate', function(req, res){
+  res.render('stripe.ejs')
+});
+app.post('/apis/donate', function(req, res){
+  res.send(req.body.stripeToken);
+});
+//###############
 
 app.get('/apis/campaign/:campaignId', function(req,res){
   if(req.params.campaignId){
