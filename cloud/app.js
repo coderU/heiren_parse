@@ -121,6 +121,10 @@ app.post('/apis/users/donate', function(req, res){
 
 
 //Apis for markers
+app.get('/map', function(req, res){
+  res.redirect('/map.html');
+});
+
 app.get('/apis/markers/locations', function(req, res){
   Marker.fetchLocations(function(result, markers){
     if(result != "ok"){
@@ -234,7 +238,7 @@ app.post('/apis/campaign/donate/:campaignId', function(req, res) {
             }else{
               res.status(500).send(result);
             }
-          });    
+          });
         });
     } else {
         res.redirect('/login');
