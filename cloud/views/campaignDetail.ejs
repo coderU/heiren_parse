@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= name %></title>
+  </head>
+  <body>
+    <h1>Name:</h1>
+    <p><%= name %></p>
+    <h1>Goal:</h1>
+    <p><%= goal %></p>
+    <h1>Founder:</h1>
+    <p><%= founder %></p>
+    <h1>Current Raised:</h1>
+    <p><%= total %></p>
+    <h1>Ranking</h1>
+    <div id="ranking">
+    </div>
+    <div id="payment" style="display: none;">
+    <form action="/apis/campaign/donate/<%= campaignId %>" method="POST">
+      <label>Amount</label>
+      <input name="amount" type="number" id="amountID" ></input>
+      <script
+        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+        data-email = "<%= email %>"
+        data-key="pk_test_PONZyZ8ylSBHB87hHBSVOwOI"
+        data-amount = document.getElementById("amountID").value;
+        data-name= "<%= name %>"
+        data-description = "Thanks for donating!"
+        data-image="/128x128.png">
+      </script>
+    </form>
+    </div>
+
+    <script>
+      var ranking =  <%- JSON.stringify(ranking) %>
+      var htmlCode = "";
+      for(var key in ranking){
+        htmlCode  = htmlCode + '<p>' + ranking[key]  +'</p>';
+      }
+      document.getElementById('ranking').innerHTML = htmlCode;
+      if("<%= currentUser %>"=="null"){
+        var htmlCode = '<a href="https://heiren.parseapp.com/login">To donate, Please login!</a>'
+        document.getElementById('payment').innerHTML = htmlCode;
+        document.getElementById("payment").style.display="block";
+      }else{
+        document.getElementById("payment").style.display="block";
+      }
+    </script>
+  </body>
+</html>

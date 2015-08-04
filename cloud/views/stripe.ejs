@@ -1,10 +1,13 @@
-<form action="/apis/donate" method="POST">
+<form action="/apis/users/donate" method="POST">
+  <label>Amount</label>
+  <input name="amount" id="amountID" ></input>
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-email = "<%= email %>"
     data-key="pk_test_PONZyZ8ylSBHB87hHBSVOwOI"
-    data-amount="2000"
-    data-name="Demo Site"
-    data-description="2 widgets ($20.00)"
+    data-amount=document.getElementById("amountID").value;
+    data-name="Inbound Africa"
+    data-description="Thanks for donating!"
     data-image="/128x128.png">
   </script>
 </form>

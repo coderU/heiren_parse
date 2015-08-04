@@ -30,23 +30,29 @@ app.post('/apis/users', function(req, res) {
       if(result != "ok"){
         res.status(500).send(result);
       }else{
-        res.send(result);
+        res.redirect('/me');
       }
     });
   }else{
     res.status(500).send("Lack of parameter!");
   }
 });
+
 app.get('/login', function(req, res) {
   // Renders the login form asking for username and password.
+  var currentUser = Parse.User.current();
+  if(currentUser){
+    res.redirect('/me');
+  }else{
     res.render('login.ejs');
+  }
 });
 
 app.get('/register', function(req, res) {
 
     var currentUser = Parse.User.current();
     if(currentUser){
-        //TODO: jump to user homepage
+      res.redirect('/me');
     }
     //should be else branch here
     res.render('register.ejs');
@@ -58,7 +64,7 @@ app.get('/apis/users', function(req, res) {
       if(result != "ok"){
         res.redirect('/login');
       }else {
-        res.redirect('/apis/users/me');
+        res.redirect('/me');
       }
     });
   }else{
@@ -172,7 +178,6 @@ app.post('/apis/markers', function(req, res){
   }else{
     res.status(500).send("Lack of parameter!");
   }
-
 });
 
 //apis for campaign
@@ -201,8 +206,8 @@ app.post('/apis/campaign', function(req, res) {
                     campaignList.push(campaignId);
                     currentUser.set("campaignList", campaignList);
                     currentUser.save(null, {
-                      success: function(gameScore) {
-                        res.send(result);
+                      success: function(user) {
+                        res.redirect('/me');
                       }
                     });
                 }
@@ -230,7 +235,7 @@ app.post('/apis/campaign/donate/:campaignId', function(req, res) {
             if(result == "ok"){
               Campaign.donate(req.params.campaignId, name, Number(req.body.amount), fetchedUser, currentUser, function(result) {
                 if(result == "ok"){
-                  res.send(result);
+                  res.redirect('/apis/campaign/'+req.params.campaignId);
                 }else{
                   res.status(500).send(result);
                 }
@@ -249,19 +254,25 @@ app.post('/apis/campaign/donate/:campaignId', function(req, res) {
 });
 
 //Test Only Api!
-app.get('/apis/donate', function(req, res){
-  res.render('stripe.ejs')
-});
-app.post('/apis/donate', function(req, res){
-  res.send(req.body.stripeToken);
-});
-//###############
-
 app.get('/apis/campaign/:campaignId', function(req,res){
+  var currentUser = Parse.User.current();
   if(req.params.campaignId){
     Campaign.fetchDetail(req.params.campaignId, function(result, campaign){
       if(result == 'ok'){
-        res.send(campaign);
+        var sortable = [];
+        var donator = campaign.get('donator')
+        for (var user in donator){
+              sortable.push([user, donator[user]]);
+            }
+        sortable.sort(function(a, b) {return b[1] - a[1]})
+        sortable = sortable.slice(0,10);
+        if(currentUser){
+          currentUser.fetch().then(function(fetchedUser){
+            res.render('campaignDetail', {ranking: sortable, name: campaign.get('name'), goal: campaign.get('goal'), founder: campaign.get('founder'), total: campaign.get('total'), campaignId: campaign.id, currentUser: currentUser, email: fetchedUser.get('email')});
+          });
+        }else{
+          res.render('campaignDetail', {ranking: sortable, name: campaign.get('name'), goal: campaign.get('goal'), founder: campaign.get('founder'), total: campaign.get('total'), campaignId: campaign.id, currentUser: currentUser, email: "0"});
+        }
       }else{
         res.status(500).send(result);
       }
@@ -271,7 +282,62 @@ app.get('/apis/campaign/:campaignId', function(req,res){
   }
 });
 
+app.get('/apis/donate', function(req, res){
+  var currentUser = Parse.User.current();
+  if(currentUser){
+    currentUser.fetch().then(function(fetchedUser){
+      res.render('stripe.ejs',{email: fetchedUser.get('email')});
+    });
 
+  }else{
+    res.redirect('/login');
+  }
+});
+app.post('/apis/donate', function(req, res){
+  res.send(req.body.stripeToken);
+});
+//###############
+
+// app.get('/apis/campaign/:campaignId', function(req,res){
+//   if(req.params.campaignId){
+//     Campaign.fetchDetail(req.params.campaignId, function(result, campaign){
+//       if(result == 'ok'){
+//         res.send(campaign);
+//       }else{
+//         res.status(500).send(result);
+//       }
+//     });
+//   }else{
+//     res.status(500).send("Lacking of parameters");
+//   }
+// });
+
+
+
+
+//Front End Requests
+app.get('/me', function(req,res){
+  var currentUser = Parse.User.current();
+  if (currentUser) {
+      currentUser.fetch().then(function(fetchedUser){
+        var campaignList = fetchedUser.get("campaignList");
+        var sum = 0;
+        var campaign_summary = [];
+        Campaign.countMoney(campaignList, 0, [],function(result, summary){
+          if(result == "ok"){
+            for(var key in summary){
+              sum+=summary[key]["total"];
+            }
+            fetchedUser.set("sum", sum);
+            fetchedUser.set("campaign_summary", summary);
+            res.render('home',{fullname: fetchedUser.get('fullname'), campaign_summary: fetchedUser.get('campaign_summary')});
+          }
+        });
+      });
+  } else {
+      res.redirect('/login');
+  }
+});
 // // Example reading from the request query string of an HTTP get request.
 // app.get('/test', function(req, res) {
 //   // GET http://example.parseapp.com/test?message=hello

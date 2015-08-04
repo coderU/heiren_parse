@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= fullname %></title>
+  </head>
+  <body>
+    <h1>Name:</h1>
+    <p><%= fullname %></p>
+    <h1>Campaigns:</h1>
+    <div id="campaigns">
+    </div>
+    <p><a href="https://heiren.parseapp.com/newCampaign">Start your own Champaign!!</a></p>
+    <script>
+      var campaigns =  <%- JSON.stringify(campaign_summary) %>
+      var htmlCode = "";
+      for(var key in campaigns){
+        htmlCode  = htmlCode + '<p><a href="https://heiren.parseapp.com/apis/campaign/' + campaigns[key]['campaignId'] + '">'+ campaigns[key]['name'] + '</a>'+ ' '+ campaigns[key]['total']+'</p>';
+      }
+      document.getElementById('campaigns').innerHTML = htmlCode;
+    </script>
+</body>
+</html>
