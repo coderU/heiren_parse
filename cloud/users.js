@@ -35,6 +35,10 @@ var User={
         });
     },
 
+    logout:function(){
+        Parse.User.logOut();        
+    },
+    
     donate: function (fetchedUser, currentUser, amount, callback) {
       var money = fetchedUser.get("money");
       money += amount;

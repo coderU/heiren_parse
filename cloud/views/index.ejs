@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Inbound Africa</title>
+    </head>
+    <body>
+        <div id="user">
+            <p><a href="/login">login</a> or <a href="/register">register</a></p>
+        </div>
+        <p>Check out the <a href="/map">map</a> here!</p>
+        <script>
+         var logedin = <%= logedin %>;
+         if(logedin){
+             var userprofile = '<p><a href="heiren.parseapp.com/me">click here to view user profile</a></p>';
+             document.getElementById('user').innerHTML = userprofile;
+           
+         }
+        </script>
+        
+    </body>
+</html>
